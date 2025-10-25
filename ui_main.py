@@ -1,17 +1,25 @@
 # ui_main.py
+import os
+import shutil
 from PyQt6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QTableWidget, QTableWidgetItem, QHeaderView, QMessageBox
+    QMainWindow, 
+    QWidget, 
+    QVBoxLayout, 
+    QHBoxLayout, 
+    QPushButton,
+    QTableWidget, 
+    QTableWidgetItem, 
+    QHeaderView, 
+    QMessageBox
 )
 from PyQt6.QtCore import Qt
 from ui_add_edit import AddEditDialog
 from ui_settings import SettingsDialog
 from storage import save_data
-import os
-import shutil
 from PyQt6.QtWidgets import QMessageBox
+from task_scheduler import TaskScheduler
+from status import StatusBar
 
-from task_scheduler import toggle_run, toggle_schedule
 
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
@@ -19,10 +27,21 @@ class MainWindow(QMainWindow):
         self.app_ref = app_ref
         self.data = data
         self.setWindowTitle("AutoClean Scheduler")
-        self.resize(900, 500)
-        self.setup_ui()
+        self.setFixedSize(1200, 700)
+        # self.setMinimumSize(1200, 700)
+        # self.setMaximumSize(1200, 700)
 
+        # ✅ Create StatusBar instance here
+        self.status_ui = StatusBar(self)
+        
+        # ✅ Create TaskScheduler instance here
+        self.task = TaskScheduler(self.status_ui)
+
+        # Initialize UI
+        self.setup_ui()
+        
     def setup_ui(self):
+        button_height = 40  # desired height in pixels
         central = QWidget()
         layout = QVBoxLayout()
 
@@ -36,7 +55,7 @@ class MainWindow(QMainWindow):
         self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
         self.btn_schedule.setCheckable(True)  # allow toggle
         self.btn_schedule.clicked.connect(
-            lambda checked: toggle_schedule(self.btn_schedule, checked)
+            lambda checked: self.task.toggle_schedule(self.btn_schedule, checked)
         )
 
         top_layout.addWidget(self.btn_schedule)
@@ -54,9 +73,13 @@ class MainWindow(QMainWindow):
         # Buttons
         btn_layout = QHBoxLayout()
         self.btn_add = QPushButton("➕ Add Folder")
-        self.btn_instant = QPushButton("⚡ Instant")   # NEW
+        self.btn_add.setFixedHeight(button_height)
+        self.btn_instant = QPushButton("⚡ Instant")
+        self.btn_instant.setFixedHeight(button_height)   # NEW
         self.btn_settings = QPushButton("⚙️ Settings")
+        self.btn_settings.setFixedHeight(button_height)
         self.btn_exit = QPushButton("❌ Exit")
+        self.btn_exit.setFixedHeight(button_height)
         btn_layout.addWidget(self.btn_add)
         btn_layout.addWidget(self.btn_instant)  # add button to layout
         btn_layout.addWidget(self.btn_settings)
@@ -73,15 +96,18 @@ class MainWindow(QMainWindow):
         self.btn_exit.clicked.connect(self.close)
 
         self.populate_table()
+        self.status_ui.update_status("Ready!", "#22C55E")
 
     # -----------------------------
     # Populate the table
     # -----------------------------
     def populate_table(self):
         self.table.setRowCount(0)
+        row_height = 40
         for i, folder in enumerate(self.data.get("folders", [])):
             row = self.table.rowCount()
             self.table.insertRow(row)
+            self.table.setRowHeight(row, row_height)  # <-- Set row height here
 
             # Folder Path
             item = QTableWidgetItem(folder["path"])
@@ -118,7 +144,7 @@ class MainWindow(QMainWindow):
             run_btn.setStyleSheet("font-size:16px;")  # optional larger icon
             
             run_btn.clicked.connect(
-                lambda checked, r=row: toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)
+                lambda checked, r=row: self.task.toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)
             )
             self.table.setCellWidget(row, 5, run_btn)
 
