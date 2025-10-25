@@ -24,6 +24,20 @@ class MainWindow(QMainWindow):
         central = QWidget()
         layout = QVBoxLayout()
 
+        # ---------------- Top buttons ----------------
+        top_layout = QHBoxLayout()
+        top_layout.addStretch()  # push the button to the right
+
+        # Big toggle button
+        self.btn_schedule = QPushButton("Schedule")
+        self.btn_schedule.setFixedSize(120, 50)  # big button
+        self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
+        self.btn_schedule.setCheckable(True)  # allow toggle
+        self.btn_schedule.clicked.connect(self.toggle_schedule)
+
+        top_layout.addWidget(self.btn_schedule)
+        layout.addLayout(top_layout)  # add above table
+
         # Table
         self.table = QTableWidget()
         self.table.setColumnCount(5)
@@ -183,3 +197,20 @@ class MainWindow(QMainWindow):
                                     pass
 
         QMessageBox.information(self, "Done", "All files and subfolders in active folders have been deleted!")
+
+
+    def toggle_schedule(self):
+        """
+        Temporary function to switch button state between Schedule and Stop.
+        Later, we can connect it to actual scheduling service.
+        """
+        if self.btn_schedule.isChecked():
+            # ON → Stop state
+            self.btn_schedule.setText("Stop")
+            self.btn_schedule.setStyleSheet("background-color: #F04444; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
+            print("Schedule stopped (temp)")
+        else:
+            # OFF → Schedule state
+            self.btn_schedule.setText("Schedule")
+            self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
+            print("Schedule started (temp)")
