@@ -8,6 +8,8 @@ from ui_add_edit import AddEditDialog
 from ui_settings import SettingsDialog
 from storage import save_data
 import os
+import shutil
+from PyQt6.QtWidgets import QMessageBox
 
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
@@ -66,7 +68,9 @@ class MainWindow(QMainWindow):
             # Folder Path
             item = QTableWidgetItem(folder["path"])
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            item.setToolTip(folder["path"])  # <-- Add tooltip
             self.table.setItem(row, 0, item)
+            self.table.setTextElideMode(Qt.TextElideMode.ElideMiddle)
 
             # Schedule
             interval = f'Every {folder["interval_value"]} {folder["interval_unit"]}'
@@ -142,11 +146,11 @@ class MainWindow(QMainWindow):
             
     def instant_delete(self):
         """
-        Delete all files in folders that are Active immediately.
+        Delete all files and subfolders in folders that are Active immediately.
         """
         reply = QMessageBox.question(
             self, "Instant Delete",
-            "Are you sure you want to delete ALL files in all Active folders?",
+            "Are you sure you want to delete ALL files and folders in all Active folders?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
         if reply != QMessageBox.StandardButton.Yes:
@@ -158,21 +162,24 @@ class MainWindow(QMainWindow):
                 include_sub = folder.get("include_subfolders", True)
                 if folder_path and os.path.exists(folder_path):
                     if include_sub:
-                        # Delete all files recursively
-                        for root, dirs, files in os.walk(folder_path):
-                            for file in files:
-                                try:
-                                    os.remove(os.path.join(root, file))
-                                except Exception:
-                                    pass
+                        # Delete everything inside recursively
+                        for item in os.listdir(folder_path):
+                            item_path = os.path.join(folder_path, item)
+                            try:
+                                if os.path.isfile(item_path) or os.path.islink(item_path):
+                                    os.remove(item_path)
+                                elif os.path.isdir(item_path):
+                                    shutil.rmtree(item_path)
+                            except Exception:
+                                pass
                     else:
-                        # Delete only files in the main folder
-                        for file in os.listdir(folder_path):
-                            fpath = os.path.join(folder_path, file)
-                            if os.path.isfile(fpath):
+                        # Delete only files in main folder (ignore subfolders)
+                        for item in os.listdir(folder_path):
+                            item_path = os.path.join(folder_path, item)
+                            if os.path.isfile(item_path):
                                 try:
-                                    os.remove(fpath)
+                                    os.remove(item_path)
                                 except Exception:
                                     pass
 
-        QMessageBox.information(self, "Done", "All files in active folders have been deleted!")
+        QMessageBox.information(self, "Done", "All files and subfolders in active folders have been deleted!")

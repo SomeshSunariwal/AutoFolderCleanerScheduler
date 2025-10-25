@@ -26,6 +26,8 @@ class AddEditDialog(QDialog):
         layout.addWidget(QLabel("Select Folder:"))
         folder_layout = QHBoxLayout()
         self.txt_folder = QLineEdit()
+        self.txt_folder.setReadOnly(True)  
+        self.txt_folder.textChanged.connect(lambda text: self.txt_folder.setToolTip(text))
         self.btn_browse = QPushButton("Browse")
         self.btn_browse.clicked.connect(self.browse_folder)
         folder_layout.addWidget(self.txt_folder)
