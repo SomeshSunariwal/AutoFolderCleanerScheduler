@@ -11,6 +11,8 @@ import os
 import shutil
 from PyQt6.QtWidgets import QMessageBox
 
+from task_scheduler import toggle_run, toggle_schedule
+
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
         super().__init__()
@@ -29,20 +31,22 @@ class MainWindow(QMainWindow):
         top_layout.addStretch()  # push the button to the right
 
         # Big toggle button
-        self.btn_schedule = QPushButton("Schedule")
+        self.btn_schedule = QPushButton("Schedule All")
         self.btn_schedule.setFixedSize(120, 50)  # big button
         self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
         self.btn_schedule.setCheckable(True)  # allow toggle
-        self.btn_schedule.clicked.connect(self.toggle_schedule)
+        self.btn_schedule.clicked.connect(
+            lambda checked: toggle_schedule(self.btn_schedule, checked)
+        )
 
         top_layout.addWidget(self.btn_schedule)
         layout.addLayout(top_layout)  # add above table
 
         # Table
         self.table = QTableWidget()
-        self.table.setColumnCount(5)
+        self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
-            ["Folder Path", "Schedule", "Status", "Edit", "Delete"]
+            ["Folder Path", "Schedule", "Status", "Edit", "Delete", "Run"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table)
@@ -75,16 +79,15 @@ class MainWindow(QMainWindow):
     # -----------------------------
     def populate_table(self):
         self.table.setRowCount(0)
-        for i, folder in enumerate(self.data.get("folders", []), start=1):
+        for i, folder in enumerate(self.data.get("folders", [])):
             row = self.table.rowCount()
             self.table.insertRow(row)
 
             # Folder Path
             item = QTableWidgetItem(folder["path"])
             item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
-            item.setToolTip(folder["path"])  # <-- Add tooltip
+            item.setToolTip(folder["path"])
             self.table.setItem(row, 0, item)
-            self.table.setTextElideMode(Qt.TextElideMode.ElideMiddle)
 
             # Schedule
             interval = f'Every {folder["interval_value"]} {folder["interval_unit"]}'
@@ -108,6 +111,16 @@ class MainWindow(QMainWindow):
             del_btn = QPushButton("🗑️")
             del_btn.clicked.connect(lambda _, r=row: self.delete_folder(r))
             self.table.setCellWidget(row, 4, del_btn)
+
+            # Play/Pause Button
+            run_btn = QPushButton("▶️")  # Start with Play symbol
+            run_btn.setCheckable(True)   # Toggle between Play/Pause
+            run_btn.setStyleSheet("font-size:16px;")  # optional larger icon
+            
+            run_btn.clicked.connect(
+                lambda checked, r=row: toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)
+            )
+            self.table.setCellWidget(row, 5, run_btn)
 
     # -----------------------------
     # Add Folder
@@ -197,20 +210,3 @@ class MainWindow(QMainWindow):
                                     pass
 
         QMessageBox.information(self, "Done", "All files and subfolders in active folders have been deleted!")
-
-
-    def toggle_schedule(self):
-        """
-        Temporary function to switch button state between Schedule and Stop.
-        Later, we can connect it to actual scheduling service.
-        """
-        if self.btn_schedule.isChecked():
-            # ON → Stop state
-            self.btn_schedule.setText("Stop")
-            self.btn_schedule.setStyleSheet("background-color: #F04444; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
-            print("Schedule stopped (temp)")
-        else:
-            # OFF → Schedule state
-            self.btn_schedule.setText("Schedule")
-            self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
-            print("Schedule started (temp)")
