@@ -13,12 +13,12 @@ from PyQt6.QtWidgets import (
     QMessageBox
 )
 from PyQt6.QtCore import Qt
-from ui_add_edit import AddEditDialog
-from ui_settings import SettingsDialog
-from storage import save_data
+from ui.ui_add_edit import AddEditDialog
+from ui.ui_settings import SettingsDialog
+from utility.storage import save_data
 from PyQt6.QtWidgets import QMessageBox
-from task_scheduler import TaskScheduler
-from status import StatusBar
+from utility.task_scheduler import TaskScheduler
+from utility.status import StatusBar
 
 
 class MainWindow(QMainWindow):

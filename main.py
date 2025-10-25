@@ -31,8 +31,8 @@ check_and_install()
 #  IMPORT AFTER DEP CHECK
 # -----------------------------
 from PyQt6.QtWidgets import QApplication
-from ui_main import MainWindow
-from storage import load_data, save_data
+from ui.ui_main import MainWindow
+from utility.storage import load_data, save_data
 
 # -----------------------------
 #  THEME HANDLER

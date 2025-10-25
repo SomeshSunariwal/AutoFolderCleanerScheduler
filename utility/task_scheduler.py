@@ -1,6 +1,3 @@
-from time import sleep
-
-
 class TaskScheduler:
 
     def __init__(self, status_ui):
