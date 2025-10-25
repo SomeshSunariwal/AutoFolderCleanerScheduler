@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
     # Add Folder
     # -----------------------------
     def add_folder(self):
-        dlg = AddEditDialog(self)
+        dlg = AddEditDialog(parent=self)
         if dlg.exec():  # User clicked Save
             folder_data = dlg.get_data()  # Get all input values including active
             self.data["folders"].append(folder_data)
