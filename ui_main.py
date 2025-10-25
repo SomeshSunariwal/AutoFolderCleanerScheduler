@@ -7,6 +7,7 @@ from PyQt6.QtCore import Qt
 from ui_add_edit import AddEditDialog
 from ui_settings import SettingsDialog
 from storage import save_data
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
@@ -33,9 +34,11 @@ class MainWindow(QMainWindow):
         # Buttons
         btn_layout = QHBoxLayout()
         self.btn_add = QPushButton("➕ Add Folder")
+        self.btn_instant = QPushButton("⚡ Instant")   # NEW
         self.btn_settings = QPushButton("⚙️ Settings")
         self.btn_exit = QPushButton("❌ Exit")
         btn_layout.addWidget(self.btn_add)
+        btn_layout.addWidget(self.btn_instant)  # add button to layout
         btn_layout.addWidget(self.btn_settings)
         btn_layout.addWidget(self.btn_exit)
         layout.addLayout(btn_layout)
@@ -45,6 +48,7 @@ class MainWindow(QMainWindow):
 
         # signals
         self.btn_add.clicked.connect(self.add_folder)
+        self.btn_instant.clicked.connect(self.instant_delete)
         self.btn_settings.clicked.connect(self.open_settings)
         self.btn_exit.clicked.connect(self.close)
 
@@ -134,3 +138,41 @@ class MainWindow(QMainWindow):
             save_data(self.data)
             from main import apply_theme
             apply_theme(self.app_ref, selected)
+
+            
+    def instant_delete(self):
+        """
+        Delete all files in folders that are Active immediately.
+        """
+        reply = QMessageBox.question(
+            self, "Instant Delete",
+            "Are you sure you want to delete ALL files in all Active folders?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        for folder in self.data.get("folders", []):
+            if folder.get("active", True):  # Only active folders
+                folder_path = folder.get("path")
+                include_sub = folder.get("include_subfolders", True)
+                if folder_path and os.path.exists(folder_path):
+                    if include_sub:
+                        # Delete all files recursively
+                        for root, dirs, files in os.walk(folder_path):
+                            for file in files:
+                                try:
+                                    os.remove(os.path.join(root, file))
+                                except Exception:
+                                    pass
+                    else:
+                        # Delete only files in the main folder
+                        for file in os.listdir(folder_path):
+                            fpath = os.path.join(folder_path, file)
+                            if os.path.isfile(fpath):
+                                try:
+                                    os.remove(fpath)
+                                except Exception:
+                                    pass
+
+        QMessageBox.information(self, "Done", "All files in active folders have been deleted!")

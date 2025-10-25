@@ -1,18 +1,16 @@
-# storage.py
-import os, json, ctypes
+import os
+import json
 
 APP_NAME = "AutoCleanScheduler"
 
 def get_data_path():
+    # Documents folder
     documents = os.path.join(os.path.expanduser("~"), "Documents")
-    app_folder = os.path.join(documents, APP_NAME, "data")
-    os.makedirs(app_folder, exist_ok=True)
-    # hide folder
-    try:
-        FILE_ATTRIBUTE_HIDDEN = 0x02
-        ctypes.windll.kernel32.SetFileAttributesW(app_folder, FILE_ATTRIBUTE_HIDDEN)
-    except Exception:
-        pass
+    # App folder directly in Documents
+    app_folder = os.path.join(documents, APP_NAME)
+    os.makedirs(app_folder, exist_ok=True)  # create if not exists
+    
+    # JSON file directly inside the app folder
     return os.path.join(app_folder, "schedules.json")
 
 DATA_FILE = get_data_path()
