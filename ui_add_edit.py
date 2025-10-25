@@ -1,15 +1,21 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSpinBox,
-    QComboBox, QPushButton, QCheckBox, QFileDialog
+    QComboBox, QPushButton, QCheckBox, QFileDialog, QMessageBox
 )
 from PyQt6.QtCore import Qt
 
 class AddEditDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, folder_data=None, parent=None):
+        """
+        folder_data: optional dict with existing values for editing
+        """
         super().__init__(parent)
         self.setWindowTitle("Add / Edit Folder Schedule")
         self.setFixedSize(420, 380)
+        # Ensure folder_data is always a dict
+        self.folder_data = folder_data or {}  
         self.setup_ui()
+        self.load_data()
 
     def setup_ui(self):
         layout = QVBoxLayout()
@@ -48,21 +54,15 @@ class AddEditDialog(QDialog):
         older_layout.addWidget(self.cmb_older)
         layout.addLayout(older_layout)
 
-        # Include Subfolders & Status
+        # Options layout: Include Subfolders + Active/Disabled
         options_layout = QHBoxLayout()
-        
-        # Include Subfolders checkbox
         self.chk_sub = QCheckBox("Include Subfolders")
-        self.chk_sub.setTristate(False)  # Ensure only two states: checked/unchecked
-        self.chk_sub.setChecked(True)    # Default ticked
+        self.chk_sub.setChecked(True)
         options_layout.addWidget(self.chk_sub)
-        
-        # Status checkbox (Active / Disabled)
-        self.chk_status = QCheckBox("Active")
-        self.chk_status.setTristate(False)
-        self.chk_status.setChecked(True)  # Default Active
-        options_layout.addWidget(self.chk_status)
 
+        self.chk_status = QCheckBox("Active")
+        self.chk_status.setChecked(True)
+        options_layout.addWidget(self.chk_status)
         layout.addLayout(options_layout)
 
         # Buttons
@@ -77,6 +77,18 @@ class AddEditDialog(QDialog):
 
         self.setLayout(layout)
 
+    def load_data(self):
+        """Load existing folder data if editing"""
+        if not self.folder_data:
+            return
+        self.txt_folder.setText(self.folder_data.get("path", ""))
+        self.spn_interval.setValue(self.folder_data.get("interval_value", 1))
+        self.cmb_interval.setCurrentText(self.folder_data.get("interval_unit", "minutes"))
+        self.spn_older.setValue(self.folder_data.get("older_than_value", 0))
+        self.cmb_older.setCurrentText(self.folder_data.get("older_than_unit", "days"))
+        self.chk_sub.setChecked(self.folder_data.get("include_subfolders", True))
+        self.chk_status.setChecked(self.folder_data.get("active", True))
+
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder:
@@ -85,7 +97,18 @@ class AddEditDialog(QDialog):
     def save_and_close(self):
         """Validate and close the dialog if all required info is provided."""
         if not self.txt_folder.text().strip():
-            from PyQt6.QtWidgets import QMessageBox
             QMessageBox.warning(self, "Error", "Please select a folder first!")
             return
-        self.accept()
+        self.accept()  # Close dialog and return Accepted
+
+    def get_data(self):
+        """Return all input values as a dictionary"""
+        return {
+            "path": self.txt_folder.text(),
+            "interval_value": self.spn_interval.value(),
+            "interval_unit": self.cmb_interval.currentText(),
+            "older_than_value": self.spn_older.value(),
+            "older_than_unit": self.cmb_older.currentText(),
+            "include_subfolders": self.chk_sub.isChecked(),
+            "active": self.chk_status.isChecked()
+        }

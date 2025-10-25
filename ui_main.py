@@ -87,51 +87,28 @@ class MainWindow(QMainWindow):
             del_btn.clicked.connect(lambda _, r=row: self.delete_folder(r))
             self.table.setCellWidget(row, 4, del_btn)
 
-
     # -----------------------------
     # Add Folder
     # -----------------------------
     def add_folder(self):
         dlg = AddEditDialog(self)
-        if dlg.exec():
-            folder = {
-                "path": dlg.txt_folder.text(),
-                "interval_value": dlg.spn_interval.value(),
-                "interval_unit": dlg.cmb_interval.currentText(),
-                "older_than_value": dlg.spn_older.value(),
-                "older_than_unit": dlg.cmb_older.currentText(),
-                "include_subfolders": dlg.chk_sub.isChecked(),
-                "active": True
-            }
-            self.data["folders"].append(folder)
+        if dlg.exec():  # User clicked Save
+            folder_data = dlg.get_data()  # Get all input values including active
+            self.data["folders"].append(folder_data)
             save_data(self.data)
-            self.populate_table()
+            self.populate_table()  # Refresh dashboard
 
     # -----------------------------
     # Edit Folder
     # -----------------------------
     def edit_folder(self, row):
         folder = self.data["folders"][row]
-        dlg = AddEditDialog(self)
-        # preload existing values
-        dlg.txt_folder.setText(folder["path"])
-        dlg.spn_interval.setValue(folder["interval_value"])
-        dlg.cmb_interval.setCurrentText(folder["interval_unit"])
-        dlg.spn_older.setValue(folder["older_than_value"])
-        dlg.cmb_older.setCurrentText(folder["older_than_unit"])
-        dlg.chk_sub.setChecked(folder["include_subfolders"])
-
+        dlg = AddEditDialog(folder_data=folder, parent=self)  # Preload all values
         if dlg.exec():
-            folder.update({
-                "path": dlg.txt_folder.text(),
-                "interval_value": dlg.spn_interval.value(),
-                "interval_unit": dlg.cmb_interval.currentText(),
-                "older_than_value": dlg.spn_older.value(),
-                "older_than_unit": dlg.cmb_older.currentText(),
-                "include_subfolders": dlg.chk_sub.isChecked()
-            })
+            updated_data = dlg.get_data()  # Read updated values including status
+            self.data["folders"][row] = updated_data
             save_data(self.data)
-            self.populate_table()
+            self.populate_table()  # Refresh dashboard
 
     # -----------------------------
     # Delete Folder
