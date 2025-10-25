@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.status_ui = StatusBar(self)
         
         # ✅ Create TaskScheduler instance here
-        self.task = TaskScheduler(self.status_ui)
+        self.task = TaskScheduler(self)
 
         # Initialize UI
         self.setup_ui()
@@ -52,7 +52,7 @@ class MainWindow(QMainWindow):
         # Big toggle button
         self.btn_schedule = QPushButton("Schedule All")
         self.btn_schedule.setFixedSize(120, 50)  # big button
-        self.btn_schedule.setStyleSheet("background-color: #0098FF; color: white; font-weight: bold; font-size: 15px; border-radius: 25px;")
+        self.btn_schedule.setStyleSheet("background-color: #0098FF; font-weight: bold; font-size: 15px; border-radius: 25px;")
         self.btn_schedule.setCheckable(True)  # allow toggle
         self.btn_schedule.clicked.connect(
             lambda checked: self.task.toggle_schedule(self.btn_schedule, checked)
@@ -141,7 +141,7 @@ class MainWindow(QMainWindow):
             # Play/Pause Button
             run_btn = QPushButton("▶️")  # Start with Play symbol
             run_btn.setCheckable(True)   # Toggle between Play/Pause
-            run_btn.setStyleSheet("font-size:16px;")  # optional larger icon
+            run_btn.setStyleSheet("background-color: #FF7263; font-size:16px; border-radius: 15px;")  # optional larger icon
             
             run_btn.clicked.connect(
                 lambda checked, r=row: self.task.toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)
