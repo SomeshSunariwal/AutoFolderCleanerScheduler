@@ -80,4 +80,4 @@ if __name__ == "__main__":
     main()
 
 
-# pyinstaller --noconsole --onefile --icon=app.ico --add-data "ico;ico" main.py
+# pyinstaller --clean --noconsole --onefile --icon=app.ico --add-data "ico;ico" main.py

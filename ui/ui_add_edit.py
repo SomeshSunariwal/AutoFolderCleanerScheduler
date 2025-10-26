@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import (
     QComboBox, QPushButton, QCheckBox, QFileDialog, QMessageBox
 )
 from PyQt6.QtGui import QIcon
+import os
 
 class AddEditDialog(QDialog):
     def __init__(self, folder_data=None, parent=None):
@@ -12,7 +13,7 @@ class AddEditDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Add / Edit Folder Schedule")
         self.setFixedSize(420, 380)
-        self.setWindowIcon(QIcon("ico/edit.ico"))
+        self.setWindowIcon(QIcon(os.path.join("ico", "edit.ico")))
         # Ensure folder_data is always a dict
         self.folder_data = folder_data or {}  
         self.setup_ui()

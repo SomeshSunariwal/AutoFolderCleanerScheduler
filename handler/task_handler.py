@@ -10,7 +10,7 @@ class TaskHandler:
         self.info_box = main_window.info_box
         self.scheduler_running = False
 
-    def toggle_run(self, folder, button_widget=None, checked=None):
+    def toggle_run(self, folder, button_widget=None, checked=None, edit_mode=False):
         """
         Function to toggle individual folder run/pause.
         """
@@ -32,12 +32,13 @@ class TaskHandler:
                 button_widget.setChecked(True)
                 # Setting Running instance to True
                 self.prepare_and_save_data(folder=folder, state=True)
-        elif not is_active:
-            self.info_box._show_dialog("Info Box", 
-                                       "Caution", 
-                                       QMessageBox.Icon.Warning, 
-                                       "Please Activate the Task First")
-            button_widget.setChecked(False)
+        elif not is_active :
+            if not edit_mode:
+                self.info_box._show_dialog("Info Box", 
+                                            "Caution", 
+                                            QMessageBox.Icon.Warning, 
+                                            "Please Activate the Task First")
+                button_widget.setChecked(False)
         else:
             # ▶️ Stopped
             if button_widget:

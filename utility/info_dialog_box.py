@@ -17,7 +17,7 @@ class InfoDialogBox():
     def _show_dialog(self, title: str, text: str, type: QMessageBox, message: str=""):
         """Show an error dialog for any cleanup issue"""
         msg = QMessageBox()
-        msg.setWindowIcon(QIcon(self.resource_path("ico/main.ico")))
+        msg.setWindowIcon(QIcon(self.resource_path(os.path.join("ico", "info.ico"))))
         msg.setIcon(type)
         msg.setWindowTitle(title)
         msg.setText(text)

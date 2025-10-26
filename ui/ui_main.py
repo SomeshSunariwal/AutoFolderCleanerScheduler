@@ -31,14 +31,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app_ref = app_ref
         self.data = data
+        
         self.setWindowTitle("AutoClean Scheduler")
-        self.setWindowIcon(QIcon(self.resource_path("ico/main.ico")))
+        self.setWindowIcon(QIcon(self.resource_path(os.path.join("ico", "main.ico"))))
         self.setFixedSize(1200, 700)
 
          # --- System Tray Setup ---
-        self.tray_icon = QSystemTrayIcon(QIcon(self.resource_path("ico/main.ico")), self)
-
-
+        self.tray_icon = QSystemTrayIcon(QIcon(self.resource_path(os.path.join("ico", "main.ico"))), self)
+              
         # Create context menu
         tray_menu = QMenu()
         show_action = QAction("Show Window")
@@ -287,7 +287,7 @@ class MainWindow(QMainWindow):
     def edit_folder(self, row):
         folder = self.data["folders"][row]
         # Then Change the switch as well
-        self.task.toggle_run(self.data["folders"][row], self.table.cellWidget(row, 5), False)
+        self.task.toggle_run(self.data["folders"][row], self.table.cellWidget(row, 5), False, True)
         dlg = AddEditDialog(folder_data=folder, parent=self)  # Preload all values
         if dlg.exec():
             updated_data = dlg.get_data()  # Read updated values including status
