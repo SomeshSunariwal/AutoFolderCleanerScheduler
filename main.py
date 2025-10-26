@@ -3,10 +3,9 @@ import sys
 import subprocess
 import importlib
 from PyQt6.QtNetwork import QLocalServer, QLocalSocket
-from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 from ui.ui_main import MainWindow
-from utility.storage import load_data, save_data
+from utility.storage import load_data
 
 # -----------------------------
 #  AUTO-INSTALL DEPENDENCIES
@@ -35,16 +34,18 @@ check_and_install()
 # -----------------------------
 #  SINGLE INSTANCE CHECK
 # -----------------------------
+server_instance = None  # global reference
+
 def is_another_instance_running(app_id="WindowsAutoFolderCleaner"):
-    """Prevent multiple instances of the app"""
+    global server_instance
     socket = QLocalSocket()
     socket.connectToServer(app_id)
     if socket.waitForConnected(500):
         print("⚠️ App is already running.")
         return True
 
-    server = QLocalServer()
-    server.listen(app_id)
+    server_instance = QLocalServer()
+    server_instance.listen(app_id)
     return False
 
 # -----------------------------
