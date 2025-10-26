@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         self.btn_exit.clicked.connect(self.close)
 
         self.populate_table()
-        self.status_ui.update_status("Ready!", "#22C55E")
+        self.status_ui.update_status("Ready!", "#22C55E", duration=3000)
 
     # -----------------------------
     # Populate the table

@@ -15,7 +15,7 @@ class TaskScheduler(QObject):
         """Start scheduler for a single folder"""
         path = folder['path']
         if path in self.active_tasks:
-            self.status_ui.update_status(f"[Start] Scheduler already running for {path}", "#FACC15")
+            self.status_ui.update_status(f"[Start] Scheduler already running for {path}", "#FACC15", duration=3000)
             return
 
         interval_ms = self._get_interval_ms(folder)
@@ -24,7 +24,7 @@ class TaskScheduler(QObject):
         timer.timeout.connect(lambda: self._run_task(folder))
         timer.start()
         self.active_tasks[path] = timer
-        self.status_ui.update_status(f"[Started] scheduler for {path}", "#22C55E")
+        self.status_ui.update_status(f"[Started] scheduler for {path}", "#22C55E", duration=3000)
 
     def runAll(self, folder=None):
         """Start scheduler for all active folders"""
@@ -38,14 +38,14 @@ class TaskScheduler(QObject):
         if path in self.active_tasks:
             self.active_tasks[path].stop()
             del self.active_tasks[path]
-            self.status_ui.update_status(f"[Removed] scheduler for {path}", "#EF4444")
+            self.status_ui.update_status(f"[Removed] scheduler for {path}", "#EF4444", duration=3000)
 
     def removeAll(self, folder=None):
         """Stop scheduler for all folders"""
         for path, timer in list(self.active_tasks.items()):
             timer.stop()
             del self.active_tasks[path]
-        self.status_ui.update_status("[Removed] all schedules", "#EF4444")
+        self.status_ui.update_status("[Removed] all schedules", "#EF4444", duration=3000)
         # TODO: Future Work
 
     def pause(self, folder):
@@ -53,14 +53,14 @@ class TaskScheduler(QObject):
         path = folder['path']
         if path in self.active_tasks:
             self.active_tasks[path].stop()
-            self.status_ui.update_status(f"[Paused] scheduler for {path}", "#FACC15")
+            self.status_ui.update_status(f"[Paused] scheduler for {path}", "#FACC15", duration=3000)
 
     def resume(self, folder):
         """Resume scheduler for a single folder"""
         path = folder['path']
         if path in self.active_tasks:
             self.active_tasks[path].start()
-            self.status_ui.update_status(f"[Resume] scheduler for {path}", "#FACC15")
+            self.status_ui.update_status(f"[Resume] scheduler for {path}", "#FACC15", duration=3000)
 
     # ----- Internal helper functions -----
     def _get_interval_ms(self, folder):
@@ -85,11 +85,11 @@ class TaskScheduler(QObject):
 
         self.is_running = True
         path = folder['path']
-        self.status_ui.update_status(f"Cleaning {path}...", "#FACC15")
+        self.status_ui.update_status(f"Cleaning {path}...", "#FACC15", duration=3000)
 
         self._clean_folder(folder)
 
-        self.status_ui.update_status(f"Cleanup done for {path}", "#22C55E")
+        self.status_ui.update_status(f"Cleanup done for {path}", "#22C55E", duration=3000)
         self.is_running = False
 
     def _clean_folder(self, folder):

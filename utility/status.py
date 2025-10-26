@@ -20,7 +20,7 @@ class StatusBar:
             }
         """)
 
-    def update_status(self, message, color="#22C55E", duration=5000):
+    def update_status(self, message, color="#22C55E", duration=3000):
         """Update the message and color"""
         self.status_bar.setStyleSheet(f"""
             QStatusBar {{
@@ -31,4 +31,16 @@ class StatusBar:
             }}
         """)
         self.status_bar.showMessage(message)
-        QTimer.singleShot(duration, lambda: self.status_bar.showMessage("Ready"))
+
+        QTimer.singleShot(duration, lambda: self.reset_color_to_green( "#00A803" ))
+
+    def reset_color_to_green(self, color):
+        self.status_bar.setStyleSheet(f"""
+            QStatusBar {{
+                background-color: #20232A;
+                color: {color};
+                font-weight: 500;
+                padding: 5px 10px;
+            }}
+        """)
+        self.status_bar.showMessage("Ready")
