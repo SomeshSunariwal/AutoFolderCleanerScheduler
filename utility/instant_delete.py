@@ -1,5 +1,6 @@
 import os
 from PyQt6.QtWidgets import QMessageBox
+from utility.info_dialog_box import InfoDialogBox
 
 def instant_delete(self):
     """
@@ -25,7 +26,9 @@ def instant_delete(self):
                             try:
                                 os.remove(os.path.join(root, file))
                             except Exception:
-                                pass
+                                InfoDialogBox._show_dialog("Error", 
+                                         "An error occurred", 
+                                         QMessageBox.Icon.Critical)
                 else:
                     # Delete only files in the main folder
                     for file in os.listdir(folder_path):
@@ -34,6 +37,8 @@ def instant_delete(self):
                             try:
                                 os.remove(fpath)
                             except Exception:
-                                pass
+                                InfoDialogBox._show_dialog("Error", 
+                                         "An error occurred", 
+                                         QMessageBox.Icon.Critical)
 
     QMessageBox.information(self, "Done", "All files in active folders have been deleted!")

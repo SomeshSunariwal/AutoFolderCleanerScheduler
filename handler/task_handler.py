@@ -1,5 +1,5 @@
 from scheduler.task_scheduler import TaskScheduler
-from utility.error_box import ErrorHandle
+from utility.info_dialog_box import ErrorHandle
 
 class TaskHandler:
 
@@ -17,16 +17,12 @@ class TaskHandler:
             if button_widget:
                 button_widget.setText("🟥")
                 # run the task
-                self.scheduler.run(folder)
-                # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                print(f"Scheduler running for folder: {folder['path']}")
+                self.scheduler.run(folder)             
         else:
             # Running
             if button_widget:
                 button_widget.setText("▶️")
                 self.scheduler.remove(folder)
-                # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                print(f"Scheduler Stopped for folder: {folder['path']}")
 
     def toggle_schedule(self, all_button, checked):
         """

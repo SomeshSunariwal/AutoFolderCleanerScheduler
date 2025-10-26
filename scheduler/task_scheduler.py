@@ -1,7 +1,8 @@
 # task_scheduler.py
 from PyQt6.QtCore import QObject, QTimer
 import os, time, shutil
-from utility.error_box import ErrorHandle
+from utility.info_dialog_box import InfoDialogBox
+from PyQt6.QtWidgets import QMessageBox
 
 class TaskScheduler(QObject):
     def __init__(self, status_ui):
@@ -22,15 +23,12 @@ class TaskScheduler(QObject):
         timer.setInterval(interval_ms)
         timer.timeout.connect(lambda: self._run_task(folder))
         timer.start()
-
         self.active_tasks[path] = timer
         self.status_ui.update_status(f"[Started] scheduler for {path}", "#22C55E")
-        print(f"[Run] Scheduler started for {path}")
 
     def runAll(self, folder=None):
         """Start scheduler for all active folders"""
         # folder parameter can be used to iterate over main window folders
-        print("[RunAll] Starting all schedulers")
         self.status_ui.update_status("[Started] all schedules", "#22C55E")
         # TODO: Iterate all folders in your main_window and call self.run(folder)
 
@@ -41,7 +39,6 @@ class TaskScheduler(QObject):
             self.active_tasks[path].stop()
             del self.active_tasks[path]
             self.status_ui.update_status(f"[Removed] scheduler for {path}", "#EF4444")
-            print(f"[Remove] Scheduler removed for {path}")
 
     def removeAll(self, folder=None):
         """Stop scheduler for all folders"""
@@ -49,7 +46,7 @@ class TaskScheduler(QObject):
             timer.stop()
             del self.active_tasks[path]
         self.status_ui.update_status("[Removed] all schedules", "#EF4444")
-        print("[RemoveAll] All schedulers removed")
+        # TODO: Future Work
 
     def pause(self, folder):
         """Pause scheduler for a single folder"""
@@ -57,7 +54,6 @@ class TaskScheduler(QObject):
         if path in self.active_tasks:
             self.active_tasks[path].stop()
             self.status_ui.update_status(f"[Paused] scheduler for {path}", "#FACC15")
-            print(f"[Pause] Scheduler paused for {path}")
 
     def resume(self, folder):
         """Resume scheduler for a single folder"""
@@ -65,7 +61,6 @@ class TaskScheduler(QObject):
         if path in self.active_tasks:
             self.active_tasks[path].start()
             self.status_ui.update_status(f"[Resume] scheduler for {path}", "#FACC15")
-            print(f"[Resume] Scheduler resume for {path}")
 
     # ----- Internal helper functions -----
     def _get_interval_ms(self, folder):
@@ -91,12 +86,10 @@ class TaskScheduler(QObject):
         self.is_running = True
         path = folder['path']
         self.status_ui.update_status(f"Cleaning {path}...", "#FACC15")
-        print(f"[Task] Cleaning {path}")
 
         self._clean_folder(folder)
 
         self.status_ui.update_status(f"Cleanup done for {path}", "#22C55E")
-        print(f"[Task] Cleanup done for {path}")
         self.is_running = False
 
     def _clean_folder(self, folder):
@@ -130,7 +123,10 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
                     except Exception as e:
-                        ErrorHandle._show_error_dialog(f"Error deleting file {fpath}: {e}")
+                        InfoDialogBox._show_dialog("Error", 
+                                                 "An error occurred", 
+                                                 QMessageBox.Icon.Critical, 
+                                                 f"Error deleting file {fpath}: {e}")
 
                 # Delete all subfolders regardless of empty/non-empty
                 for dir in dirs:
@@ -138,13 +134,10 @@ class TaskScheduler(QObject):
                     try:
                         shutil.rmtree(dir_path)
                     except Exception as e:
-                        ErrorHandle._show_error_dialog(f"Error deleting folder {dir_path}: {e}")
-
-            # Optionally delete the main folder itself if you want
-            # try:
-            #     shutil.rmtree(base)
-            # except Exception as e:
-            #     print(f"Error deleting base folder {base}: {e}")
+                        InfoDialogBox._show_dialog("Error", 
+                                                 "An error occurred", 
+                                                 QMessageBox.Icon.Critical, 
+                                                 f"Error deleting folder {dir_path}: {e}")
 
         else:
             # Only delete files in the main folder (no recursion)
@@ -158,4 +151,7 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
             except Exception as e:
-                ErrorHandle._show_error_dialog(f"Error cleaning folder {base}: {e}")
+                InfoDialogBox._show_dialog("Error", 
+                                         "An error occurred", 
+                                         QMessageBox.Icon.Critical, 
+                                         f"Error cleaning folder {base}: {e}")
