@@ -123,10 +123,7 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
                     except Exception as e:
-                        self.info_box._show_dialog("Error", 
-                                                 "An error occurred", 
-                                                 QMessageBox.Icon.Critical, 
-                                                 f"Error deleting file {fpath}: {e}")
+                        pass
 
                 # Delete all subfolders regardless of empty/non-empty
                 for dir in dirs:
@@ -134,10 +131,7 @@ class TaskScheduler(QObject):
                     try:
                         shutil.rmtree(dir_path)
                     except Exception as e:
-                        self.info_box._show_dialog("Error", 
-                                                 "An error occurred", 
-                                                 QMessageBox.Icon.Critical, 
-                                                 f"Error deleting folder {dir_path}: {e}")
+                        pass
 
         else:
             # Only delete files in the main folder (no recursion)
@@ -151,7 +145,4 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
             except Exception as e:
-                self.info_box._show_dialog("Error", 
-                                         "An error occurred", 
-                                         QMessageBox.Icon.Critical, 
-                                         f"Error cleaning folder {base}: {e}")
+                pass
