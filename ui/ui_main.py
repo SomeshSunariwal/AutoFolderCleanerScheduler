@@ -16,9 +16,9 @@ from PyQt6.QtCore import Qt
 from ui.ui_add_edit import AddEditDialog
 from ui.ui_settings import SettingsDialog
 from utility.storage import save_data
-from PyQt6.QtWidgets import QMessageBox
 from handler.task_handler import TaskHandler
 from utility.status import StatusBar
+from utility.instant_delete import instant_delete
 
 
 class MainWindow(QMainWindow):
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
 
         # signals
         self.btn_add.clicked.connect(self.add_folder)
-        self.btn_instant.clicked.connect(self.instant_delete)
+        self.btn_instant.clicked.connect(lambda: instant_delete(self=self))
         self.btn_settings.clicked.connect(self.open_settings)
         self.btn_exit.clicked.connect(self.close)
 
@@ -141,7 +141,6 @@ class MainWindow(QMainWindow):
             # Play/Pause Button
             run_btn = QPushButton("▶️")  # Start with Play symbol
             run_btn.setCheckable(True)   # Toggle between Play/Pause
-            
             run_btn.clicked.connect(
                 lambda checked, r=row: self.task.toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)
             )
@@ -163,7 +162,7 @@ class MainWindow(QMainWindow):
     # -----------------------------
     def edit_folder(self, row):
         folder = self.data["folders"][row]
-        self.task.pause_task(self.data["folders"][row])
+        self.task.remove_task(self.data["folders"][row])
         dlg = AddEditDialog(folder_data=folder, parent=self)  # Preload all values
         if dlg.exec():
             updated_data = dlg.get_data()  # Read updated values including status
@@ -179,6 +178,8 @@ class MainWindow(QMainWindow):
             "Are you sure you want to delete this schedule?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
+            # First delete the task then remove
+            self.task.remove_task(self.data["folders"][row])
             self.data["folders"].pop(row)
             save_data(self.data)
             self.populate_table()
@@ -195,44 +196,3 @@ class MainWindow(QMainWindow):
             save_data(self.data)
             from main import apply_theme
             apply_theme(self.app_ref, selected)
-
-            
-    def instant_delete(self):
-        """
-        Delete all files and subfolders in folders that are Active immediately.
-        """
-        reply = QMessageBox.question(
-            self, "Instant Delete",
-            "Are you sure you want to delete ALL files and folders in all Active folders?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        if reply != QMessageBox.StandardButton.Yes:
-            return
-
-        for folder in self.data.get("folders", []):
-            if folder.get("active", True):  # Only active folders
-                folder_path = folder.get("path")
-                include_sub = folder.get("include_subfolders", True)
-                if folder_path and os.path.exists(folder_path):
-                    if include_sub:
-                        # Delete everything inside recursively
-                        for item in os.listdir(folder_path):
-                            item_path = os.path.join(folder_path, item)
-                            try:
-                                if os.path.isfile(item_path) or os.path.islink(item_path):
-                                    os.remove(item_path)
-                                elif os.path.isdir(item_path):
-                                    shutil.rmtree(item_path)
-                            except Exception:
-                                pass
-                    else:
-                        # Delete only files in main folder (ignore subfolders)
-                        for item in os.listdir(folder_path):
-                            item_path = os.path.join(folder_path, item)
-                            if os.path.isfile(item_path):
-                                try:
-                                    os.remove(item_path)
-                                except Exception:
-                                    pass
-
-        QMessageBox.information(self, "Done", "All files and subfolders in active folders have been deleted!")

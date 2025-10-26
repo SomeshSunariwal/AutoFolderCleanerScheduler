@@ -1,4 +1,5 @@
 import os
+from PyQt6.QtWidgets import QMessageBox
 
 def instant_delete(self):
     """

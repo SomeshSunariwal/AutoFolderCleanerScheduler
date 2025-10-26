@@ -1,4 +1,5 @@
 from scheduler.task_scheduler import TaskScheduler
+from utility.error_box import ErrorHandle
 
 class TaskHandler:
 
@@ -76,7 +77,7 @@ class TaskHandler:
 
             self.main_window.status_ui.update_status("All schedules stopped", "#EF4444")
 
-    def pause_task(self, folder):
+    
+    def remove_task(self, folder):
         # if botton is pressed then remove the task:
-        self.main_window.status_ui.update_status(f"Stop schedule for {folder['path']}...", "#FACC15", duration=2000)
         self.scheduler.remove(folder=folder)
