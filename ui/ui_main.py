@@ -17,7 +17,7 @@ from ui.ui_add_edit import AddEditDialog
 from ui.ui_settings import SettingsDialog
 from utility.storage import save_data
 from PyQt6.QtWidgets import QMessageBox
-from utility.task_scheduler import TaskScheduler
+from handler.task_handler import TaskHandler
 from utility.status import StatusBar
 
 
@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.status_ui = StatusBar(self)
         
         # ✅ Create TaskScheduler instance here
-        self.task = TaskScheduler(self)
+        self.task = TaskHandler(self)
 
         # Initialize UI
         self.setup_ui()

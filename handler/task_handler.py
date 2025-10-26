@@ -1,7 +1,11 @@
-class TaskScheduler:
+from scheduler.task_scheduler import TaskScheduler
+
+class TaskHandler:
 
     def __init__(self, main_window):
         self.main_window = main_window
+        self.scheduler = TaskScheduler(main_window.status_ui)
+        self.scheduler_running = False
 
     def toggle_run(self, folder, button_widget=None, checked=None):
         """
@@ -11,13 +15,15 @@ class TaskScheduler:
             # Paused
             if button_widget:
                 button_widget.setText("🟥")
-                self.schedule_task(folder)
+                # run the task
+                self.scheduler.run(folder)
                 # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 print(f"Scheduler running for folder: {folder['path']}")
         else:
             # Running
             if button_widget:
                 button_widget.setText("▶️")
+                self.scheduler.remove(folder)
                 # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
                 print(f"Scheduler paused for folder: {folder['path']}")
 
@@ -70,11 +76,28 @@ class TaskScheduler:
 
             self.main_window.status_ui.update_status("All schedules stopped", "#EF4444")
 
-    def schedule_task(self, folder):
-        """
-        Dummy placeholder function to schedule a folder.
-        Replace this with actual scheduling logic later.
-        """
-        print(f"[Scheduled Task Placeholder] Folder: {folder['path']}")
-        # Example: simulate processing time
-        # time.sleep(0.5)  # optional for testing
+    # def schedule_task(self, folder, action="run", checked=None):
+    #         """
+    #         Single entry point for all TaskScheduler operations.
+    #         folder : dict containing folder data
+    #         action : str, one of ['run', 'runAll', 'remove', 'removeAll', 'pause', 'toggle']
+    #         checked: bool, used for toggle action
+    #         """
+
+    #         print(folder)
+
+    #         if action == "run":
+    #             self.scheduler.run(folder)
+    #         elif action == "runAll":
+    #             self.scheduler.runAll(folder)
+    #         elif action == "remove":
+    #             self.scheduler.remove(folder)
+    #         elif action == "removeAll":
+    #             self.scheduler.removeAll(folder)
+    #         elif action == "pause":
+    #             self.scheduler.pause(folder)
+    #         elif action == "toggle":
+    #             if checked:
+    #                 self.scheduler.run(folder)
+    #             else:
+    #                 self.scheduler.pause(folder)
