@@ -22,6 +22,7 @@ from handler.task_handler import TaskHandler
 from utility.status import StatusBar
 from utility.instant_delete import instant_delete
 from utility.info_dialog_box import InfoDialogBox
+from handler.register_handler import RegisterHandler
 
 
 class MainWindow(QMainWindow):
@@ -60,6 +61,9 @@ class MainWindow(QMainWindow):
         
         # ✅ Create TaskScheduler instance here
         self.task = TaskHandler(self)
+
+        # ✅ Create RegisterHandler instance here
+        self.register_handler = RegisterHandler(self)
 
         # Initialize UI
         self.setup_ui()
@@ -105,6 +109,22 @@ class MainWindow(QMainWindow):
         # ---------------- Top buttons ----------------
         top_layout = QHBoxLayout()
         top_layout.addStretch()  # push the button to the right
+
+        # --- Run in Background Button ---
+        self.btn_run_bg = QPushButton("Run in Background")
+        self.btn_run_bg.setFixedSize(150, 50)
+        self.btn_run_bg.setStyleSheet("""
+           background-color: #22C55E;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 25px;
+        """)
+        self.btn_run_bg.setCheckable(True)  # allow toggle
+        self.btn_run_bg.clicked.connect(
+            lambda checked: self.register_handler.toggle_startup(self.btn_run_bg, checked)
+        )
+
+        top_layout.addWidget(self.btn_run_bg)
 
         # Big toggle button
         self.btn_schedule = QPushButton("Schedule All")
