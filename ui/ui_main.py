@@ -23,6 +23,7 @@ from utility.status import StatusBar
 from utility.instant_delete import instant_delete
 from utility.info_dialog_box import InfoDialogBox
 from handler.register_handler import RegisterHandler
+import sys, os
 
 
 class MainWindow(QMainWindow):
@@ -31,11 +32,11 @@ class MainWindow(QMainWindow):
         self.app_ref = app_ref
         self.data = data
         self.setWindowTitle("AutoClean Scheduler")
-        self.setWindowIcon(QIcon("ico/main.ico"))
+        self.setWindowIcon(QIcon(self.resource_path("ico/main.ico")))
         self.setFixedSize(1200, 700)
 
          # --- System Tray Setup ---
-        self.tray_icon = QSystemTrayIcon(QIcon("ico/main.ico"), self)
+        self.tray_icon = QSystemTrayIcon(QIcon(self.resource_path("ico/main.ico")), self)
 
         # Create context menu
         tray_menu = QMenu()
@@ -100,6 +101,16 @@ class MainWindow(QMainWindow):
     def exit_app(self):
         self.tray_icon.hide()  # hide tray icon first
         QApplication.quit()
+
+    def resource_path(self, relative_path):
+        """Get absolute path to resource (works for dev & for PyInstaller .exe)"""
+        try:
+            # When running as .exe
+            base_path = sys._MEIPASS
+        except Exception:
+            # When running as script
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
 
     def setup_ui(self):
         button_height = 40  # desired height in pixels

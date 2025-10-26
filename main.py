@@ -2,6 +2,11 @@
 import sys
 import subprocess
 import importlib
+from PyQt6.QtNetwork import QLocalServer, QLocalSocket
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication
+from ui.ui_main import MainWindow
+from utility.storage import load_data, save_data
 
 # -----------------------------
 #  AUTO-INSTALL DEPENDENCIES
@@ -26,12 +31,21 @@ def check_and_install():
 
 check_and_install()
 
+
 # -----------------------------
-#  IMPORT AFTER DEP CHECK
+#  SINGLE INSTANCE CHECK
 # -----------------------------
-from PyQt6.QtWidgets import QApplication
-from ui.ui_main import MainWindow
-from utility.storage import load_data, save_data
+def is_another_instance_running(app_id="WindowsAutoFolderCleaner"):
+    """Prevent multiple instances of the app"""
+    socket = QLocalSocket()
+    socket.connectToServer(app_id)
+    if socket.waitForConnected(500):
+        print("⚠️ App is already running.")
+        return True
+
+    server = QLocalServer()
+    server.listen(app_id)
+    return False
 
 # -----------------------------
 #  THEME HANDLER
@@ -50,6 +64,10 @@ def apply_theme(app, theme):
 #  MAIN APP ENTRY
 # -----------------------------
 def main():
+    # Prevent multiple instances
+    if is_another_instance_running():
+        sys.exit(0)
+
     app = QApplication(sys.argv)
     data = load_data()
     apply_theme(app, data["settings"].get("theme", "light"))
@@ -59,3 +77,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# pyinstaller --noconsole --onefile --icon=app.ico --add-data "ico;ico" main.py
