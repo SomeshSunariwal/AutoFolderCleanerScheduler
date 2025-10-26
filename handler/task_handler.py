@@ -1,5 +1,5 @@
 from scheduler.task_scheduler import TaskScheduler
-from utility.info_dialog_box import ErrorHandle
+from utility.info_dialog_box import InfoDialogBox
 
 class TaskHandler:
 
