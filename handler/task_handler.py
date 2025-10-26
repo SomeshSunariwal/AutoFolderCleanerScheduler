@@ -1,5 +1,6 @@
 from scheduler.task_scheduler import TaskScheduler
 from utility.info_dialog_box import InfoDialogBox
+from PyQt6.QtWidgets import QMessageBox
 
 class TaskHandler:
 
@@ -10,16 +11,23 @@ class TaskHandler:
 
     def toggle_run(self, folder, button_widget=None, checked=None):
         """
-        function to toggle individual folder run/pause.
+        Function to toggle individual folder run/pause.
         """
-        if checked:
-            # Paused
+        is_active = folder.get("active", False)  # check if folder is active
+
+        if checked and is_active:
+            # 🟥 Paused / Running
             if button_widget:
                 button_widget.setText("🟥")
-                # run the task
-                self.scheduler.run(folder)             
+                self.scheduler.run(folder)
+        elif not is_active:
+            InfoDialogBox._show_dialog("Info", 
+                                       "Caution", 
+                                       QMessageBox.Icon.Warning, 
+                                       "Please Activate the Task First")
+            button_widget.setChecked(False)
         else:
-            # Running
+            # ▶️ Stopped
             if button_widget:
                 button_widget.setText("▶️")
                 self.scheduler.remove(folder)
@@ -40,7 +48,7 @@ class TaskHandler:
                     border-radius: 25px;
             """)
 
-            self.main_window.status_ui.update_status("Starting all schedules...", "#FACC15", duration=2000)
+            self.main_window.status_ui.update_status("Starting all schedule tasks...", "#FACC15", duration=3000)
 
             # Schedule all active folders
             for row in range(self.main_window.table.rowCount()):
@@ -51,7 +59,7 @@ class TaskHandler:
                         run_btn.setChecked(True)  # Running
                         self.toggle_run(folder, run_btn, checked=True)
 
-            self.main_window.status_ui.update_status("All schedules running...", "#22C55E")
+            self.main_window.status_ui.update_status("All schedules tasks running...", "#22C55E", duration=3000)
 
         else:
             all_button.setText("Schedule All")
@@ -62,7 +70,7 @@ class TaskHandler:
                     font-size: 15px;
                     border-radius: 25px;
             """)
-            self.main_window.status_ui.update_status("Stopping all schedules...", "#FACC15", duration=2000)
+            self.main_window.status_ui.update_status("Stopping all scheduled tasks...", "#FACC15", duration=3000)
 
             for row in range(self.main_window.table.rowCount()):
                 folder = self.main_window.data["folders"][row]
@@ -71,7 +79,7 @@ class TaskHandler:
                     run_btn.setChecked(False)  # Paused
                     self.toggle_run(folder, run_btn, checked=False)
 
-            self.main_window.status_ui.update_status("All schedules stopped", "#EF4444")
+            self.main_window.status_ui.update_status("All scheduled tasks stopped", "#EF4444", duration=3000)
 
     
     def remove_task(self, folder):
