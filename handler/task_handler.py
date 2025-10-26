@@ -29,7 +29,7 @@ class TaskHandler:
                 """)
                 self.scheduler.run(folder)
         elif not is_active:
-            InfoDialogBox._show_dialog("Info", 
+            InfoDialogBox._show_dialog("Info Box", 
                                        "Caution", 
                                        QMessageBox.Icon.Warning, 
                                        "Please Activate the Task First")

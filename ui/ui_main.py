@@ -18,6 +18,7 @@ from utility.storage import save_data
 from handler.task_handler import TaskHandler
 from utility.status import StatusBar
 from utility.instant_delete import instant_delete
+from utility.info_dialog_box import InfoDialogBox
 
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
@@ -152,7 +153,19 @@ class MainWindow(QMainWindow):
         dlg = AddEditDialog(parent=self)
         if dlg.exec():  # User clicked Save
             folder_data = dlg.get_data()  # Get all input values including active
-            self.data["folders"].append(folder_data)
+
+            # Check for duplicate folder path
+            existing_paths = [f['path'].lower() for f in self.data.get("folders", [])]
+            if folder_data['path'].lower() in existing_paths:
+                # Show error dialog if duplicate
+                InfoDialogBox._show_dialog("Info Box", 
+                                           "Information: ",
+                                           QMessageBox.Icon.Information,
+                                           f"Folder \"{folder_data['path']}\" is already present.")
+                return  # Stop adding
+
+            # No duplicate → add folder
+            self.data.setdefault("folders", []).append(folder_data)
             save_data(self.data)
             self.populate_table()  # Refresh dashboard
 
