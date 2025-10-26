@@ -1,6 +1,6 @@
 # task_scheduler.py
 from PyQt6.QtCore import QObject, QTimer
-import os, time
+import os, time, shutil
 
 class TaskScheduler(QObject):
     def __init__(self, status_ui):
@@ -57,6 +57,14 @@ class TaskScheduler(QObject):
             self.active_tasks[path].stop()
             self.status_ui.update_status(f"Paused scheduler for {path}", "#FACC15")
             print(f"[Pause] Scheduler paused for {path}")
+
+    def resume(self, folder):
+        """Resume scheduler for a single folder"""
+        path = folder['path']
+        if path in self.active_tasks:
+            self.active_tasks[path].start()
+            self.status_ui.update_status(f"Resume scheduler for {path}", "#FACC15")
+            print(f"[Resume] Scheduler resume for {path}")
 
     # ----- Internal helper functions -----
     def _get_interval_ms(self, folder):

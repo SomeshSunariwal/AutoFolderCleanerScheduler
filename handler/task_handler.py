@@ -9,7 +9,7 @@ class TaskHandler:
 
     def toggle_run(self, folder, button_widget=None, checked=None):
         """
-        Dummy function to toggle individual folder run/pause.
+        function to toggle individual folder run/pause.
         """
         if checked:
             # Paused
@@ -76,28 +76,7 @@ class TaskHandler:
 
             self.main_window.status_ui.update_status("All schedules stopped", "#EF4444")
 
-    # def schedule_task(self, folder, action="run", checked=None):
-    #         """
-    #         Single entry point for all TaskScheduler operations.
-    #         folder : dict containing folder data
-    #         action : str, one of ['run', 'runAll', 'remove', 'removeAll', 'pause', 'toggle']
-    #         checked: bool, used for toggle action
-    #         """
-
-    #         print(folder)
-
-    #         if action == "run":
-    #             self.scheduler.run(folder)
-    #         elif action == "runAll":
-    #             self.scheduler.runAll(folder)
-    #         elif action == "remove":
-    #             self.scheduler.remove(folder)
-    #         elif action == "removeAll":
-    #             self.scheduler.removeAll(folder)
-    #         elif action == "pause":
-    #             self.scheduler.pause(folder)
-    #         elif action == "toggle":
-    #             if checked:
-    #                 self.scheduler.run(folder)
-    #             else:
-    #                 self.scheduler.pause(folder)
+    def pause_task(self, folder):
+        # if botton is pressed then remove the task:
+        self.main_window.status_ui.update_status(f"Stop schedule for {folder['path']}...", "#FACC15", duration=2000)
+        self.scheduler.remove(folder=folder)

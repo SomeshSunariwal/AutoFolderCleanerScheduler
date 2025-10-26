@@ -163,6 +163,7 @@ class MainWindow(QMainWindow):
     # -----------------------------
     def edit_folder(self, row):
         folder = self.data["folders"][row]
+        self.task.pause_task(self.data["folders"][row])
         dlg = AddEditDialog(folder_data=folder, parent=self)  # Preload all values
         if dlg.exec():
             updated_data = dlg.get_data()  # Read updated values including status
