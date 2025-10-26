@@ -1,9 +1,8 @@
 import os
 from PyQt6.QtWidgets import QMessageBox
-from utility.info_dialog_box import InfoDialogBox
+import os, shutil
 
 def instant_delete(self):
-    info_box = InfoDialogBox()  # Create an instance
     """
     Delete all files in folders that are Active immediately.
     """
@@ -23,13 +22,22 @@ def instant_delete(self):
                 if include_sub:
                     # Delete all files recursively
                     for root, dirs, files in os.walk(folder_path):
+                        # Delete files first
                         for file in files:
+                            fpath = os.path.join(root, file)
                             try:
-                                os.remove(os.path.join(root, file))
-                            except Exception:
-                                info_box._show_dialog("Error", 
-                                         "An error occurred", 
-                                         QMessageBox.Icon.Critical)
+                                os.remove(fpath)
+                            except Exception as e:
+                                pass
+
+                        # Delete all subfolders regardless of empty/non-empty
+                        for dir in dirs:
+                            dir_path = os.path.join(root, dir)
+                            print("dir_path -> " + dir_path)
+                            try:
+                                shutil.rmtree(dir_path)
+                            except Exception as e:
+                                pass
                 else:
                     # Delete only files in the main folder
                     for file in os.listdir(folder_path):
@@ -38,8 +46,5 @@ def instant_delete(self):
                             try:
                                 os.remove(fpath)
                             except Exception:
-                                info_box._show_dialog("Error", 
-                                         "An error occurred", 
-                                         QMessageBox.Icon.Critical)
-
+                                continue
     QMessageBox.information(self, "Done", "All files in active folders have been deleted!")
