@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
          # --- System Tray Setup ---
         self.tray_icon = QSystemTrayIcon(QIcon(self.resource_path("ico/main.ico")), self)
 
+
         # Create context menu
         tray_menu = QMenu()
         show_action = QAction("Show Window")
@@ -60,6 +61,9 @@ class MainWindow(QMainWindow):
         # ✅ Create StatusBar instance here
         self.status_ui = StatusBar(self)
         
+       # ✅ Create InfoDialogBox instance here
+        self.info_box = InfoDialogBox()
+
         # ✅ Create TaskScheduler instance here
         self.task = TaskHandler(self)
 
@@ -68,6 +72,9 @@ class MainWindow(QMainWindow):
 
         # Initialize UI
         self.setup_ui()
+ 
+        # Restart from old state after restart
+        self.restore_active_schedules()
 
     # Override closeEvent to minimize to tray
     def closeEvent(self, event):
@@ -111,6 +118,22 @@ class MainWindow(QMainWindow):
             # When running as script
             base_path = os.path.abspath(".")
         return os.path.join(base_path, relative_path)
+    
+    def restore_active_schedules(self):
+        for row, folder in enumerate(self.data.get("folders", [])):
+            if folder.get("running", False):
+                try:
+                    self.task.run_task(folder=folder)
+                    btn = self.table.cellWidget(row, 5)
+                    if btn:
+                        btn.setChecked(True)
+                        btn.setText("🟥")  # indicate it's running
+                    self.status_ui.update_status("All Task Restored...", "#22C55E", duration=3000)
+                except Exception as e:
+                    self.info_box._show_dialog("Error Box", 
+                                               "Error Occur",
+                                               QMessageBox.Icon.Critical, 
+                                               f"[AutoStart] Failed to restore {folder['path']}: {e}")
 
     def setup_ui(self):
         button_height = 40  # desired height in pixels
@@ -153,7 +176,7 @@ class MainWindow(QMainWindow):
         self.table = QTableWidget()
         self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels(
-            ["Folder Path", "Schedule", "Status", "Edit", "Delete", "Run"]
+            ["Folder Path", "Schedule", "Task Status", "Edit", "Delete", "Run"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table)
@@ -211,7 +234,7 @@ class MainWindow(QMainWindow):
             self.table.setItem(row, 1, interval_item)
 
             # Status
-            status_item = QTableWidgetItem("Active" if folder["active"] else "Paused")
+            status_item = QTableWidgetItem("Enable" if folder["active"] else "Disabled")
             status_item.setFlags(status_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             status_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
             self.table.setItem(row, 2, status_item)
@@ -241,12 +264,13 @@ class MainWindow(QMainWindow):
         dlg = AddEditDialog(parent=self)
         if dlg.exec():  # User clicked Save
             folder_data = dlg.get_data()  # Get all input values including active
-
+            folder_data["running"] = False
+            print(folder_data)
             # Check for duplicate folder path
             existing_paths = [f['path'].lower() for f in self.data.get("folders", [])]
             if folder_data['path'].lower() in existing_paths:
                 # Show error dialog if duplicate
-                InfoDialogBox._show_dialog("Info Box", 
+                self.info_box._show_dialog("Info Box", 
                                            "Information: ",
                                            QMessageBox.Icon.Information,
                                            f"Folder \"{folder_data['path']}\" is already present.")
@@ -262,7 +286,8 @@ class MainWindow(QMainWindow):
     # -----------------------------
     def edit_folder(self, row):
         folder = self.data["folders"][row]
-        self.task.remove_task(self.data["folders"][row])
+        # Then Change the switch as well
+        self.task.toggle_run(self.data["folders"][row], self.table.cellWidget(row, 5), False)
         dlg = AddEditDialog(folder_data=folder, parent=self)  # Preload all values
         if dlg.exec():
             updated_data = dlg.get_data()  # Read updated values including status

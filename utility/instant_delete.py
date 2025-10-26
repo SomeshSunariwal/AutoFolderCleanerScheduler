@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import QMessageBox
 from utility.info_dialog_box import InfoDialogBox
 
 def instant_delete(self):
+    info_box = InfoDialogBox()  # Create an instance
     """
     Delete all files in folders that are Active immediately.
     """
@@ -26,7 +27,7 @@ def instant_delete(self):
                             try:
                                 os.remove(os.path.join(root, file))
                             except Exception:
-                                InfoDialogBox._show_dialog("Error", 
+                                info_box._show_dialog("Error", 
                                          "An error occurred", 
                                          QMessageBox.Icon.Critical)
                 else:
@@ -37,7 +38,7 @@ def instant_delete(self):
                             try:
                                 os.remove(fpath)
                             except Exception:
-                                InfoDialogBox._show_dialog("Error", 
+                                info_box._show_dialog("Error", 
                                          "An error occurred", 
                                          QMessageBox.Icon.Critical)
 

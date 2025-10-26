@@ -1,12 +1,13 @@
 from scheduler.task_scheduler import TaskScheduler
-from utility.info_dialog_box import InfoDialogBox
 from PyQt6.QtWidgets import QMessageBox
+from utility.storage import save_data, load_data
 
 class TaskHandler:
 
     def __init__(self, main_window):
         self.main_window = main_window
-        self.scheduler = TaskScheduler(main_window.status_ui)
+        self.scheduler = TaskScheduler(main_window.status_ui, main_window.info_box)
+        self.info_box = main_window.info_box
         self.scheduler_running = False
 
     def toggle_run(self, folder, button_widget=None, checked=None):
@@ -28,8 +29,11 @@ class TaskHandler:
                 }
                 """)
                 self.scheduler.run(folder)
+                button_widget.setChecked(True)
+                # Setting Running instance to True
+                self.prepare_and_save_data(folder=folder, state=True)
         elif not is_active:
-            InfoDialogBox._show_dialog("Info Box", 
+            self.info_box._show_dialog("Info Box", 
                                        "Caution", 
                                        QMessageBox.Icon.Warning, 
                                        "Please Activate the Task First")
@@ -39,7 +43,10 @@ class TaskHandler:
             if button_widget:
                 button_widget.setText("▶️")
                 button_widget.setStyleSheet("")
+                button_widget.setChecked(False)
                 self.scheduler.remove(folder)
+                # Setting Running instance to False
+                self.prepare_and_save_data(folder=folder, state=False)
 
     def toggle_schedule(self, all_button, checked):
         """
@@ -94,3 +101,23 @@ class TaskHandler:
     def remove_task(self, folder):
         # if botton is pressed then remove the task:
         self.scheduler.remove(folder=folder)
+
+    def run_task(self, folder):
+        # run task only
+        self.scheduler.run(folder)
+
+    def prepare_and_save_data(self, folder, state):
+        """
+        Update the running state of a specific folder and save JSON.
+        :param folder: dict of folder info
+        :param state: bool (True = running, False = stopped)
+        """
+        data = load_data()  # Load latest data from storage
+
+        # Find the folder in saved data and update its running state
+        for f in data["folders"]:
+            if f["path"] == folder["path"]:
+                f["running"] = state
+                break
+        
+        save_data(data)  # Save the updated data back to JSON

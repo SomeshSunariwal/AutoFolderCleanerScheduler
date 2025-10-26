@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtGui import QIcon
+import os
 
-class InfoDialogBox:
+class InfoDialogBox():
 
-    def resource_path(relative_path):
+    def resource_path(self, relative_path):
         """Get absolute path to resource (works for dev & for PyInstaller .exe)"""
         try:
             # When running as .exe

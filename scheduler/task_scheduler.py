@@ -1,13 +1,13 @@
 # task_scheduler.py
 from PyQt6.QtCore import QObject, QTimer
 import os, time, shutil
-from utility.info_dialog_box import InfoDialogBox
 from PyQt6.QtWidgets import QMessageBox
 
 class TaskScheduler(QObject):
-    def __init__(self, status_ui):
+    def __init__(self, status_ui, info_box):
         super().__init__()
         self.status_ui = status_ui
+        self.info_box = info_box
         self.active_tasks = {}  # folder path -> QTimer
         self.is_running = False  # ensures only 1 task runs at a time
 
@@ -123,7 +123,7 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
                     except Exception as e:
-                        InfoDialogBox._show_dialog("Error", 
+                        self.info_box._show_dialog("Error", 
                                                  "An error occurred", 
                                                  QMessageBox.Icon.Critical, 
                                                  f"Error deleting file {fpath}: {e}")
@@ -134,7 +134,7 @@ class TaskScheduler(QObject):
                     try:
                         shutil.rmtree(dir_path)
                     except Exception as e:
-                        InfoDialogBox._show_dialog("Error", 
+                        self.info_box._show_dialog("Error", 
                                                  "An error occurred", 
                                                  QMessageBox.Icon.Critical, 
                                                  f"Error deleting folder {dir_path}: {e}")
@@ -151,7 +151,7 @@ class TaskScheduler(QObject):
                         else:
                             os.remove(fpath)
             except Exception as e:
-                InfoDialogBox._show_dialog("Error", 
+                self.info_box._show_dialog("Error", 
                                          "An error occurred", 
                                          QMessageBox.Icon.Critical, 
                                          f"Error cleaning folder {base}: {e}")

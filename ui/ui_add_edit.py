@@ -68,6 +68,8 @@ class AddEditDialog(QDialog):
         options_layout.addWidget(self.chk_status)
         layout.addLayout(options_layout)
 
+        self.run_status = False
+
         # Buttons
         btn_layout = QHBoxLayout()
         self.btn_save = QPushButton("Save")
@@ -91,6 +93,7 @@ class AddEditDialog(QDialog):
         self.cmb_older.setCurrentText(self.folder_data.get("older_than_unit", "days"))
         self.chk_sub.setChecked(self.folder_data.get("include_subfolders", True))
         self.chk_status.setChecked(self.folder_data.get("active", True))
+        self.run_status = self.folder_data.get("running", False)
 
     def browse_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
@@ -113,5 +116,6 @@ class AddEditDialog(QDialog):
             "older_than_value": self.spn_older.value(),
             "older_than_unit": self.cmb_older.currentText(),
             "include_subfolders": self.chk_sub.isChecked(),
-            "active": self.chk_status.isChecked()
+            "active": self.chk_status.isChecked(),
+            "running": self.run_status
         }
