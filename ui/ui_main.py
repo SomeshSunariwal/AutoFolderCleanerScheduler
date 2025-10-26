@@ -8,10 +8,13 @@ from PyQt6.QtWidgets import (
     QTableWidget, 
     QTableWidgetItem, 
     QHeaderView, 
-    QMessageBox
+    QMessageBox,
+    QApplication, 
+    QSystemTrayIcon, 
+    QMenu
 )
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QAction
 from ui.ui_add_edit import AddEditDialog
 from ui.ui_settings import SettingsDialog
 from utility.storage import save_data
@@ -19,6 +22,7 @@ from handler.task_handler import TaskHandler
 from utility.status import StatusBar
 from utility.instant_delete import instant_delete
 from utility.info_dialog_box import InfoDialogBox
+
 
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
@@ -28,8 +32,28 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("AutoClean Scheduler")
         self.setWindowIcon(QIcon("ico/main.ico"))
         self.setFixedSize(1200, 700)
-        # self.setMinimumSize(1200, 700)
-        # self.setMaximumSize(1200, 700)
+
+         # --- System Tray Setup ---
+        self.tray_icon = QSystemTrayIcon(QIcon("ico/main.ico"), self)
+
+        # Create context menu
+        tray_menu = QMenu()
+        show_action = QAction("Show Window")
+        quit_action = QAction("Exit App")
+        tray_menu.addAction(show_action)
+        tray_menu.addAction(quit_action)
+
+        # Attach menu to tray icon
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.setToolTip("AutoClean Scheduler")
+
+        # Connect actions
+        show_action.triggered.connect(self.show_window)
+        quit_action.triggered.connect(self.exit_app)
+
+        # Left-click restores window
+        self.tray_icon.activated.connect(self.on_tray_icon_activated)
+
 
         # ✅ Create StatusBar instance here
         self.status_ui = StatusBar(self)
@@ -39,7 +63,40 @@ class MainWindow(QMainWindow):
 
         # Initialize UI
         self.setup_ui()
-        
+
+    # Override closeEvent to minimize to tray
+    def closeEvent(self, event):
+        """Window 'X' button quits completely"""
+        self.tray_icon.hide()  # remove tray icon
+        QApplication.quit()
+    
+    def hide_to_tray(self):
+        """Hide window to tray when Exit button is clicked"""
+        self.tray_icon.show()
+        self.hide()
+        self.tray_icon.showMessage(
+            "Windows Auto Folder Cleaner",
+            "Application is still running in the system tray",
+            QSystemTrayIcon.MessageIcon.Information,
+            3000
+        )
+
+    def on_tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:  # left click
+            self.show_window()
+            self.tray_icon.hide()
+
+    # Show window from tray
+    def show_window(self):
+        self.show()
+        self.raise_()          # Bring window to top
+        self.activateWindow()  # Give focus to the window
+
+    # Quit app properly
+    def exit_app(self):
+        self.tray_icon.hide()  # hide tray icon first
+        QApplication.quit()
+
     def setup_ui(self):
         button_height = 40  # desired height in pixels
         central = QWidget()
@@ -78,7 +135,7 @@ class MainWindow(QMainWindow):
         self.btn_instant.setFixedHeight(button_height)   # NEW
         self.btn_settings = QPushButton("⚙️ Settings")
         self.btn_settings.setFixedHeight(button_height)
-        self.btn_exit = QPushButton("❌ Exit")
+        self.btn_exit = QPushButton("👁️ Hide in Tray")
         self.btn_exit.setFixedHeight(button_height)
         btn_layout.addWidget(self.btn_add)
         btn_layout.addWidget(self.btn_instant)  # add button to layout
@@ -93,7 +150,7 @@ class MainWindow(QMainWindow):
         self.btn_add.clicked.connect(self.add_folder)
         self.btn_instant.clicked.connect(lambda: instant_delete(self=self))
         self.btn_settings.clicked.connect(self.open_settings)
-        self.btn_exit.clicked.connect(self.close)
+        self.btn_exit.clicked.connect(self.hide_to_tray)
 
         self.populate_table()
         self.status_ui.update_status("Ready!", "#22C55E", duration=3000)
