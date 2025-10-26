@@ -25,7 +25,7 @@ class TaskHandler:
                 button_widget.setText("▶️")
                 self.scheduler.remove(folder)
                 # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-                print(f"Scheduler paused for folder: {folder['path']}")
+                print(f"Scheduler Stopped for folder: {folder['path']}")
 
     def toggle_schedule(self, all_button, checked):
         """
