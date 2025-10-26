@@ -62,7 +62,7 @@ class TaskScheduler(QObject):
     def _get_interval_ms(self, folder):
         value = folder.get('interval_value', 5)
         unit = folder.get('interval_unit', 'seconds')
-        
+
         # Multiplier: convert unit to milliseconds
         multiplier = {
             'seconds': 1000,
@@ -91,24 +91,62 @@ class TaskScheduler(QObject):
         self.is_running = False
 
     def _clean_folder(self, folder):
-        """Core cleanup logic"""
+        """Core cleanup logic deleting all files and folders, including non-empty subfolders"""
         base = folder['path']
         include_sub = folder.get('include_subfolders', True)
-        older_than_hours = folder.get('older_than_value', 0)
+        older_than_value = folder.get('older_than_value', 0)
+        older_than_unit = folder.get('older_than_unit', 'hours').lower()
         now = time.time()
-        cutoff = now - (older_than_hours * 3600)
 
-        for root, dirs, files in os.walk(base):
-            for file in files:
-                fpath = os.path.join(root, file)
-                try:
-                    if older_than_hours > 0:
-                        if os.path.getmtime(fpath) < cutoff:
+        # Convert older_than_value to seconds
+        unit_multipliers = {
+            'seconds': 1,
+            'minutes': 60,
+            'hours': 3600,
+            'days': 24 * 3600
+        }
+        multiplier = unit_multipliers.get(older_than_unit, 3600)  # default hours
+        cutoff = now - (older_than_value * multiplier)
+
+        if include_sub:
+            # Walk all folders and subfolders from bottom up
+            for root, dirs, files in os.walk(base, topdown=False):
+                # Delete files first
+                for file in files:
+                    fpath = os.path.join(root, file)
+                    try:
+                        if older_than_value > 0:
+                            if os.path.getmtime(fpath) < cutoff:
+                                os.remove(fpath)
+                        else:
                             os.remove(fpath)
-                    else:
-                        os.remove(fpath)
-                except Exception as e:
-                    print(f"Error deleting {fpath}: {e}")
+                    except Exception as e:
+                        print(f"Error deleting file {fpath}: {e}")
 
-            if not include_sub:
-                break
+                # Delete all subfolders regardless of empty/non-empty
+                for dir in dirs:
+                    dir_path = os.path.join(root, dir)
+                    try:
+                        shutil.rmtree(dir_path)
+                    except Exception as e:
+                        print(f"Error deleting folder {dir_path}: {e}")
+
+            # Optionally delete the main folder itself if you want
+            # try:
+            #     shutil.rmtree(base)
+            # except Exception as e:
+            #     print(f"Error deleting base folder {base}: {e}")
+
+        else:
+            # Only delete files in the main folder (no recursion)
+            try:
+                for file in os.listdir(base):
+                    fpath = os.path.join(base, file)
+                    if os.path.isfile(fpath):
+                        if older_than_value > 0:
+                            if os.path.getmtime(fpath) < cutoff:
+                                os.remove(fpath)
+                        else:
+                            os.remove(fpath)
+            except Exception as e:
+                print(f"Error cleaning folder {base}: {e}")
