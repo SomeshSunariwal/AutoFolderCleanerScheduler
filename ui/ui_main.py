@@ -1,6 +1,4 @@
 # ui_main.py
-import os
-import shutil
 from PyQt6.QtWidgets import (
     QMainWindow, 
     QWidget, 
@@ -13,6 +11,7 @@ from PyQt6.QtWidgets import (
     QMessageBox
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QIcon
 from ui.ui_add_edit import AddEditDialog
 from ui.ui_settings import SettingsDialog
 from utility.storage import save_data
@@ -20,13 +19,13 @@ from handler.task_handler import TaskHandler
 from utility.status import StatusBar
 from utility.instant_delete import instant_delete
 
-
 class MainWindow(QMainWindow):
     def __init__(self, app_ref, data):
         super().__init__()
         self.app_ref = app_ref
         self.data = data
         self.setWindowTitle("AutoClean Scheduler")
+        self.setWindowIcon(QIcon("ico/main.ico"))
         self.setFixedSize(1200, 700)
         # self.setMinimumSize(1200, 700)
         # self.setMaximumSize(1200, 700)

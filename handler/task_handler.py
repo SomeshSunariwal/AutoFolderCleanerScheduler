@@ -19,6 +19,14 @@ class TaskHandler:
             # 🟥 Paused / Running
             if button_widget:
                 button_widget.setText("🟥")
+                button_widget.setStyleSheet("""
+                QPushButton {
+                    background-color: #EDEDED;   /* Red for Pause */
+                }
+                QPushButton:hover {
+                    background-color: #C2C2C2;   /* Darker on hover */
+                }
+                """)
                 self.scheduler.run(folder)
         elif not is_active:
             InfoDialogBox._show_dialog("Info", 
@@ -30,6 +38,7 @@ class TaskHandler:
             # ▶️ Stopped
             if button_widget:
                 button_widget.setText("▶️")
+                button_widget.setStyleSheet("")
                 self.scheduler.remove(folder)
 
     def toggle_schedule(self, all_button, checked):

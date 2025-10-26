@@ -8,7 +8,6 @@ import importlib
 # -----------------------------
 required_packages = [
     "PyQt6",
-    "APScheduler"
 ]
 
 def install_package(package):
