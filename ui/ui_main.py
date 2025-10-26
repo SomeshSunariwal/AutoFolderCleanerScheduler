@@ -141,7 +141,6 @@ class MainWindow(QMainWindow):
             # Play/Pause Button
             run_btn = QPushButton("▶️")  # Start with Play symbol
             run_btn.setCheckable(True)   # Toggle between Play/Pause
-            run_btn.setStyleSheet("background-color: #FF7263; font-size:16px; border-radius: 15px;")  # optional larger icon
             
             run_btn.clicked.connect(
                 lambda checked, r=row: self.task.toggle_run(self.data["folders"][r], self.table.cellWidget(r, 5), checked)

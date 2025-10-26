@@ -1,6 +1,3 @@
-import time
-
-
 class TaskScheduler:
 
     def __init__(self, main_window):
@@ -14,16 +11,15 @@ class TaskScheduler:
             # Paused
             if button_widget:
                 button_widget.setText("🟥")
-                button_widget.setStyleSheet("background-color: #F5F5F5; font-size:16px; border-radius: 15px;")
                 self.schedule_task(folder)
-            print(f"Scheduler paused for folder: {folder['path']}")
+                # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                print(f"Scheduler running for folder: {folder['path']}")
         else:
             # Running
             if button_widget:
                 button_widget.setText("▶️")
-                button_widget.setStyleSheet("background-color: #FF7263; font-size:16px; border-radius: 15px;")
-            print(f"Scheduler running for folder: {folder['path']}")
-
+                # button_widget.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                print(f"Scheduler paused for folder: {folder['path']}")
 
     def toggle_schedule(self, all_button, checked):
         """
@@ -34,13 +30,11 @@ class TaskScheduler:
         if checked:
             all_button.setText("Stop All")
             all_button.setStyleSheet("""
-                QPushButton {
                     background-color: #F04444;
                     color: white;
                     font-weight: bold;
                     font-size: 15px;
                     border-radius: 25px;
-                }
             """)
 
             self.main_window.status_ui.update_status("Starting all schedules...", "#FACC15", duration=2000)
@@ -51,7 +45,7 @@ class TaskScheduler:
                 run_btn = self.main_window.table.cellWidget(row, 5)
                 if folder.get("active", True):
                     if run_btn:
-                        run_btn.setChecked(False)  # Running
+                        run_btn.setChecked(True)  # Running
                         self.toggle_run(folder, run_btn, checked=True)
 
             self.main_window.status_ui.update_status("All schedules running...", "#22C55E")
@@ -59,13 +53,11 @@ class TaskScheduler:
         else:
             all_button.setText("Schedule All")
             all_button.setStyleSheet("""
-                QPushButton {
                     background-color: #0098FF;
                     color: white;
                     font-weight: bold;
                     font-size: 15px;
                     border-radius: 25px;
-                }
             """)
             self.main_window.status_ui.update_status("Stopping all schedules...", "#FACC15", duration=2000)
 
@@ -73,7 +65,7 @@ class TaskScheduler:
                 folder = self.main_window.data["folders"][row]
                 run_btn = self.main_window.table.cellWidget(row, 5)
                 if folder.get("active", True) and run_btn:
-                    run_btn.setChecked(True)  # Paused
+                    run_btn.setChecked(False)  # Paused
                     self.toggle_run(folder, run_btn, checked=False)
 
             self.main_window.status_ui.update_status("All schedules stopped", "#EF4444")
