@@ -14,6 +14,22 @@ A lightweight Windows utility to automatically clean specified folders by deleti
 
 ---
 
+## Application Interface
+
+1. **Main Dashboard**
+
+<img src="./img/page 1.jpg" alt="Image01" width="75%" />
+
+2. **Add Section**
+
+<img src="./img/page 2.jpg" alt="Image02" width="75%" />
+
+3. **Button Works**
+
+<img src="./img/page 3.jpg" alt="Image02" width="75%" />
+
+---
+
 ## Application
 
 TO use the application please check the release section. 
